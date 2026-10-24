@@ -1,0 +1,26 @@
+{
+  "name": "bloch-lab",
+  "private": true,
+  "type": "module",
+  "description": "Bloch Lab \u2014 learn quantum computing visually with interactive 3D.",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate && node scripts/postgenerate.mjs",
+    "preview": "nuxt preview",
+    "test": "vitest run",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "katex": "^0.19.1",
+    "nuxt": "^4.6.2",
+    "three": "^0.186.1",
+    "vue": "^3.5.44",
+    "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.186.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
