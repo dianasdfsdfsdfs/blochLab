@@ -172,7 +172,7 @@ const NuxtLinkC = resolveComponent('NuxtLink')
   flex-wrap: wrap;
   align-items: center;
   gap: clamp(32px, 5vw, 56px);
-  padding-top: clamp(32px, 6vw, 64px);
+  padding-top: clamp(20px, 3vw, 36px);
   padding-bottom: clamp(56px, 8vw, 96px);
 }
 .hero-copy {

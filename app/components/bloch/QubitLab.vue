@@ -30,25 +30,6 @@ const gateList = computed(() => props.gates.map(k => GATES[k]))
       :flash="q.flash.value"
     />
 
-    <div class="readout" aria-live="polite">
-      <span class="label">State</span>
-      <span class="ket">|ψ⟩ = {{ q.ket.value }}</span>
-      <span class="angles">θ = {{ q.angles.value.theta }}° · φ = {{ q.angles.value.phi }}°</span>
-    </div>
-
-    <div class="probs">
-      <div class="prob">
-        <span class="pl">P(0)</span>
-        <div class="bar"><div class="fill f0" :style="{ width: q.p0.value + '%' }" /></div>
-        <span class="pv">{{ q.p0.value }}%</span>
-      </div>
-      <div class="prob">
-        <span class="pl">P(1)</span>
-        <div class="bar"><div class="fill f1" :style="{ width: q.p1.value + '%' }" /></div>
-        <span class="pv">{{ q.p1.value }}%</span>
-      </div>
-    </div>
-
     <div class="controls">
       <div class="gates" role="group" aria-label="Quantum gates">
         <button
@@ -67,6 +48,25 @@ const gateList = computed(() => props.gates.map(k => GATES[k]))
       <div class="actions">
         <button type="button" class="btn btn-primary measure" @click="q.measure()">Measure</button>
         <button type="button" class="btn btn-ghost reset" @click="q.reset()">Reset</button>
+      </div>
+    </div>
+
+    <div class="readout" aria-live="polite">
+      <span class="label">State</span>
+      <span class="ket">|ψ⟩ = {{ q.ket.value }}</span>
+      <span class="angles">θ = {{ q.angles.value.theta }}° · φ = {{ q.angles.value.phi }}°</span>
+    </div>
+
+    <div class="probs">
+      <div class="prob">
+        <span class="pl">P(0)</span>
+        <div class="bar"><div class="fill f0" :style="{ width: q.p0.value + '%' }" /></div>
+        <span class="pv">{{ q.p0.value }}%</span>
+      </div>
+      <div class="prob">
+        <span class="pl">P(1)</span>
+        <div class="bar"><div class="fill f1" :style="{ width: q.p1.value + '%' }" /></div>
+        <span class="pv">{{ q.p1.value }}%</span>
       </div>
     </div>
 
@@ -125,8 +125,10 @@ const gateList = computed(() => props.gates.map(k => GATES[k]))
   color: var(--faint);
 }
 .sphere {
-  max-width: 460px;
-  margin: -8px auto;
+  /* keep the sphere and the gate buttons on one screen, even on short laptop displays */
+  width: min(100%, 440px, max(260px, calc(100vh - 290px)));
+  width: min(100%, 440px, max(260px, calc(100svh - 290px)));
+  margin: -10px auto -6px;
 }
 .readout {
   display: flex;
