@@ -184,7 +184,8 @@ code,
 }
 
 .section {
-  padding: clamp(56px, 9vw, 96px) 0;
+  padding-top: clamp(56px, 9vw, 96px);
+  padding-bottom: clamp(56px, 9vw, 96px);
 }
 
 .section-head {
