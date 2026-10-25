@@ -685,7 +685,8 @@ export class BlochScene {
     const fit = 1.55
     this.dist = Math.max(fit / Math.tan(half), fit / (Math.tan(half) * this.camera.aspect))
     this.camera.updateProjectionMatrix()
-    if (!this.running) this.renderOnce()
+    // draw immediately so the sphere is correct even before the next animation frame
+    this.renderOnce()
   }
 
   private renderOnce() {
