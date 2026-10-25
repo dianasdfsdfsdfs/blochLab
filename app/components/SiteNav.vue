@@ -49,7 +49,7 @@ const links = [
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(7, 6, 26, 0.9);
+  background: rgba(7, 6, 26, 0.97);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(201, 184, 255, 0.08);

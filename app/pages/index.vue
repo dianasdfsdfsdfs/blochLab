@@ -470,7 +470,8 @@ a.card:hover {
 }
 .badge {
   align-self: flex-start;
-  margin-top: 4px;
+  /* pin every "Coming soon" badge to the bottom of its card so they line up */
+  margin-top: auto;
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 999px;
