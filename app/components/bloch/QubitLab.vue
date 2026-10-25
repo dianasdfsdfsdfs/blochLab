@@ -5,13 +5,16 @@ const props = withDefaults(defineProps<{
   heading?: string
   gates?: (typeof GATE_ORDER)[number][]
   showHistory?: boolean
+  /** Pass a qubit from useQubit() to control this lab from outside (e.g. "try it" buttons). */
+  qubit?: ReturnType<typeof useQubit>
 }>(), {
   heading: 'The Bloch sphere',
   gates: () => [...GATE_ORDER],
   showHistory: true,
+  qubit: undefined,
 })
 
-const q = useQubit()
+const q = props.qubit ?? useQubit()
 const gateList = computed(() => props.gates.map(k => GATES[k]))
 </script>
 

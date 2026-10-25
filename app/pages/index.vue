@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LESSONS } from '~/data/lessons'
 import { GLOSSARY } from '~/data/glossary'
+import type { GateKey } from '~/lib/quantum'
 
 const { siteUrl } = useRuntimeConfig().public
 
@@ -33,6 +34,27 @@ useHead({
 })
 
 const glossaryPreview = GLOSSARY.slice(0, 12)
+
+// One qubit shared by the 3D lab and the "What am I looking at?" guide,
+// so the guide's "try it" buttons move the arrow on the sphere.
+const q = useQubit()
+const lab = ref<{ $el: HTMLElement } | null>(null)
+
+function showLab() {
+  const el = lab.value?.$el
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  const sphereBottom = r.top + Math.min(r.height, 560)
+  if (r.top < 64 || sphereBottom > window.innerHeight) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+function tryIt(seq: ('reset' | 'measure' | GateKey)[]) {
+  showLab()
+  for (const s of seq) {
+    if (s === 'reset') q.reset()
+    else if (s === 'measure') q.measure()
+    else q.gate(s)
+  }
+}
 const NuxtLinkC = resolveComponent('NuxtLink')
 </script>
 
@@ -40,27 +62,74 @@ const NuxtLinkC = resolveComponent('NuxtLink')
   <div>
     <!-- HERO -->
     <section class="container hero">
-      <div class="hero-copy">
+      <div class="hero-title">
         <div class="pill glass">
           <span class="dot" />
           Quantum computing, visualized
         </div>
         <h1 class="grad-text">See a qubit think.</h1>
-        <p class="lead">
-          Bloch Lab explains quantum computing with interactive 3D. Rotate a real qubit, apply quantum gates and watch
-          measurement happen — no math background needed to start.
+      </div>
+
+      <QubitLab ref="lab" class="hero-lab" :qubit="q" />
+
+      <div class="guide glass" aria-labelledby="guide-title">
+        <h2 id="guide-title" class="guide-title">What am I looking at?</h2>
+        <p class="guide-intro">
+          This is a <strong>Bloch sphere</strong> — a map of every state one <strong>qubit</strong> (a quantum bit) can be in.
+          The glowing arrow shows the qubit right now.
         </p>
-        <div class="cta">
-          <NuxtLink to="/learn/what-is-a-qubit" class="btn btn-primary">Start learning</NuxtLink>
-          <NuxtLink to="/playground" class="btn btn-ghost">Open the Playground</NuxtLink>
-        </div>
-        <ul class="facts">
-          <li>Free, no account</li>
-          <li>Interactive 3D</li>
-          <li>Beginner friendly</li>
+        <ul class="guide-list">
+          <li>
+            <span class="g-icon i-poles" aria-hidden="true">0<small>1</small></span>
+            <div>
+              <h3>Top is |0⟩, bottom is |1⟩</h3>
+              <p>They are the qubit’s version of a normal bit’s 0 and 1. When you measure, the qubit always answers 0 or 1.</p>
+            </div>
+          </li>
+          <li>
+            <span class="g-icon i-vert" aria-hidden="true">↕</span>
+            <div>
+              <h3>Up and down = the odds</h3>
+              <p>The higher the arrow, the more likely you get 0. On the equator it’s a 50/50 coin flip.</p>
+              <div class="try">
+                <button type="button" @click="tryIt(['reset', 'H'])">Try H → 50/50</button>
+                <button type="button" @click="tryIt(['reset', 'X'])">Try X → always 1</button>
+              </div>
+            </div>
+          </li>
+          <li>
+            <span class="g-icon i-around" aria-hidden="true">↻</span>
+            <div>
+              <h3>Around the equator = the phase</h3>
+              <p>
+                Turning sideways doesn’t change the odds, but it changes how the qubit reacts to the next gate.
+                |+⟩, |−⟩, |+i⟩ and |−i⟩ are all 50/50 states — the sign is their phase.
+              </p>
+              <div class="try">
+                <button type="button" @click="tryIt(['reset', 'H', 'Z'])">Try H, then Z → |+⟩ to |−⟩</button>
+              </div>
+            </div>
+          </li>
+          <li>
+            <span class="g-icon i-gate" aria-hidden="true">G</span>
+            <div>
+              <h3>Gates are moves</h3>
+              <p>
+                Each button turns the arrow around an axis — that is a <strong>quantum gate</strong>. A quantum program is
+                a sequence of gates, and at the end you <strong>measure</strong>: the arrow jumps to 0 or 1.
+              </p>
+              <div class="try">
+                <button type="button" @click="tryIt(['measure'])">Measure now</button>
+              </div>
+            </div>
+          </li>
         </ul>
       </div>
-      <QubitLab class="hero-lab" />
+
+      <div class="hero-cta">
+        <NuxtLink to="/learn/bloch-sphere" class="btn btn-primary">Full Bloch sphere lesson</NuxtLink>
+        <NuxtLink to="/learn/what-is-a-qubit" class="btn btn-ghost">Start from the basics</NuxtLink>
+      </div>
     </section>
 
     <!-- LEARNING PATH -->
@@ -168,22 +237,43 @@ const NuxtLinkC = resolveComponent('NuxtLink')
 
 <style scoped>
 .hero {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: clamp(32px, 5vw, 56px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'title lab'
+    'guide lab'
+    'cta   lab';
+  grid-template-rows: auto auto 1fr;
+  column-gap: clamp(28px, 4vw, 56px);
+  row-gap: 22px;
   padding-top: clamp(20px, 3vw, 36px);
   padding-bottom: clamp(56px, 8vw, 96px);
 }
-.hero-copy {
-  flex: 1 1 420px;
-  min-width: 0;
+.hero-title {
+  grid-area: title;
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 18px;
+  min-width: 0;
 }
 .hero-lab {
-  flex: 1 1 440px;
+  grid-area: lab;
+  align-self: start;
+  scroll-margin-top: 84px;
+}
+.guide {
+  grid-area: guide;
+  min-width: 0;
+}
+.hero-cta {
+  grid-area: cta;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-self: start;
+}
+.hero-cta .btn {
+  min-height: 50px;
 }
 .pill {
   align-self: flex-start;
@@ -204,45 +294,137 @@ const NuxtLinkC = resolveComponent('NuxtLink')
 }
 h1 {
   font-weight: 700;
-  font-size: clamp(46px, 7.5vw, 88px);
+  font-size: clamp(42px, 5vw, 66px);
   line-height: 1;
   letter-spacing: -0.04em;
   padding-bottom: 0.06em;
 }
-.lead {
-  font-size: clamp(17px, 2vw, 19px);
+
+/* the "What am I looking at?" guide */
+.guide {
+  border-radius: 24px;
+  padding: clamp(18px, 2.4vw, 24px);
+  background: linear-gradient(150deg, rgba(124, 58, 237, 0.16), rgba(59, 130, 246, 0.06) 60%, rgba(255, 255, 255, 0.02));
+  border-color: rgba(192, 132, 252, 0.24);
+}
+.guide-title {
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.guide-intro {
+  font-size: 15px;
   line-height: 1.6;
   color: var(--muted);
-  max-width: 520px;
+  margin-bottom: 14px;
 }
-.cta {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.guide-intro strong,
+.guide-list strong {
+  color: var(--ink-strong);
+  font-weight: 600;
 }
-.cta .btn {
-  min-height: 54px;
-  padding: 0 26px;
-}
-.facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 24px;
+.guide-list {
+  list-style: none;
   margin: 0;
   padding: 0;
-  list-style: none;
-  font-size: 14px;
-  color: var(--muted-2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-.facts li::before {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: var(--lilac);
-  vertical-align: middle;
+.guide-list li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.guide-list h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  margin-bottom: 2px;
+}
+.guide-list p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #bdb6e2;
+}
+.g-icon {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: #fff;
+  position: relative;
+}
+.i-poles {
+  background: linear-gradient(180deg, #a855f7, #3b82f6);
+  font-size: 13px;
+  line-height: 1;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 1px;
+}
+.i-poles small {
+  font-size: 11px;
+  opacity: 0.85;
+}
+.i-vert {
+  background: rgba(124, 58, 237, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(192, 132, 252, 0.5);
+}
+.i-around {
+  background: rgba(34, 211, 238, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.5);
+  color: var(--cyan);
+}
+.i-gate {
+  background: linear-gradient(140deg, #7c3aed, #a855f7);
+  box-shadow: 0 0 16px -4px rgba(168, 85, 247, 0.9);
+}
+.try {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.try button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  background: rgba(124, 58, 237, 0.16);
+  color: #eadfff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.try button:hover {
+  background: rgba(124, 58, 237, 0.34);
+  border-color: rgba(192, 132, 252, 0.8);
+  transform: translateY(-1px);
+}
+.try button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'title'
+      'lab'
+      'guide'
+      'cta';
+    grid-template-rows: auto;
+  }
 }
 
 /* cards */
