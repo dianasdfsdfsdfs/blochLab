@@ -70,12 +70,24 @@ h1 {
 .index {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 8px;
   margin-bottom: 32px;
-  font-size: 14px;
 }
 .index a {
-  color: var(--muted-2);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 184, 255, 0.18);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  color: #e3dcff;
+  font-size: 14px;
+  line-height: 1.3;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.index a:hover,
+.index a:focus-visible {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(192, 132, 252, 0.6);
+  color: #fff;
 }
 .terms {
   display: flex;
